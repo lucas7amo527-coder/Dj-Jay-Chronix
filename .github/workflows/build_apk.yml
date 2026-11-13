@@ -17,16 +17,95 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Create Fresh App & Compile APK
+      - name: Create Clean App & Compile APK
         run: |
           flutter create /tmp/dj_app --platforms=android --project-name dj_jay_e_chronix --org com.djjayechronix
-          cp lib/main.dart /tmp/dj_app/lib/main.dart
           cd /tmp/dj_app
           flutter pub add url_launcher
-          flutter build apk --debug
-          mkdir -p $GITHUB_WORKSPACE/output
-          cp build/app/outputs/flutter-apk/app-debug.apk $GITHUB_WORKSPACE/output/app-debug.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dj-chronix-apk
-          path: output/app-debug.apk
+          cat << 'EOF' > lib/main.dart
+          import 'package:flutter/material.dart';
+          import 'package:flutter/services.dart';
+          import 'package:url_launcher/url_launcher.dart';
+
+          void main() => runApp(const DJChronixApp());
+
+          class DJChronixApp extends StatelessWidget {
+            const DJChronixApp({super.key});
+
+            @override
+            Widget build(BuildContext context) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'DJ JAY E CHRONIX',
+                theme: ThemeData.dark().copyWith(
+                  scaffoldBackgroundColor: const Color(0xFF0D0D0F),
+                ),
+                home: const ActivationScreen(),
+              );
+            }
+          }
+
+          class ActivationScreen extends StatefulWidget {
+            const ActivationScreen({super.key});
+
+            @override
+            State<ActivationScreen> createState() => _ActivationScreenState();
+          }
+
+          class _ActivationScreenState extends State<ActivationScreen> {
+            final TextEditingController _codeController = TextEditingController();
+            String _statusMessage = '';
+            bool _isError = false;
+
+            final Set<String> _validCodes = {
+              'JAYE-7B3N-4W9Q',
+              'JAYE-8K4P-92MX',
+              'JAYE-5R9T-2V6C',
+            };
+
+            void _verifyAndUnlock() {
+              final code = _codeController.text.trim().toUpperCase();
+              if (_validCodes.contains(code)) {
+                setState(() {
+                  _isError = false;
+                  _statusMessage = 'Unlocked! Welcome to DJ JAY E CHRONIX Studio.';
+                });
+              } else {
+                setState(() {
+                  _isError = true;
+                  _statusMessage = 'Invalid code. Tap WhatsApp below to get yours.';
+                });
+              }
+            }
+
+            Future<void> _openWhatsApp() async {
+              final url = Uri.parse(
+                'https://wa.me.',
+              );
+              await launchUrl(url, mode: LaunchMode.externalApplication);
+            }
+
+            @override
+            Widget build(BuildContext context) {
+              const gold = Color(0xFFD4AF37);
+              return Scaffold(
+                body: SafeArea(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(28),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'DJ JAY E\nCHRONIX',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: gold, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 2),
+                          ),
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.all(18),
+                            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: gold, width: 2)),
+                            child: const Icon(Icons.lock_outline, color: gold, size: 42),
+                          ),
+                          const SizedBox(height: 24),
+                          const Text('Enter Activation Code', style: TextStyle(fontSize: 18, fontWeight: Font
