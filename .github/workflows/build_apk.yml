@@ -17,16 +17,13 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Setup Flutter Project & Android SDK
+      - name: Build Clean APK
         run: |
           rm -f pubspec.yaml
           flutter create . --platforms=android --project-name dj_jay_e_chronix --org com.djjayechronix
-          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 24/g' android/app/build.gradle.kts || true
-          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 24/g' android/app/build.gradle || true
-          flutter pub add url_launcher audioplayers video_player file_picker shared_preferences
-      - name: Build Release APK
-        run: flutter build apk --release --verbose
+          flutter pub add url_launcher
+          flutter build apk --debug
       - uses: actions/upload-artifact@v4
         with:
-          name: dj-chronix-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: dj-chronix-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
