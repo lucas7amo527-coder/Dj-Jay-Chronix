@@ -17,10 +17,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Generate Android Platform Files
-        run: flutter create . --platforms=android --project-name dj_jay_e_chronix --org com.djjayechronix
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Setup Flutter Project & Dependencies
+        run: |
+          rm -f pubspec.yaml
+          flutter create . --platforms=android --project-name dj_jay_e_chronix --org com.djjayechronix
+          flutter pub add url_launcher audioplayers video_player file_picker shared_preferences
       - name: Build Release APK
         run: flutter build apk --release
       - uses: actions/upload-artifact@v4
