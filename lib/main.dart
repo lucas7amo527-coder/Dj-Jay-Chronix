@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void main() {
-  runApp(const DJChronixApp());
-}
+void main() => runApp(const DJChronixApp());
 
 class DJChronixApp extends StatelessWidget {
   const DJChronixApp({super.key});
@@ -33,7 +30,6 @@ class _ActivationScreenState extends State<ActivationScreen> {
   final TextEditingController _codeController = TextEditingController();
   String _statusMessage = '';
   bool _isError = false;
-  bool _isLoading = false;
 
   final Set<String> _validCodes = {
     'JAYE-7B3N-4W9Q',
@@ -41,71 +37,36 @@ class _ActivationScreenState extends State<ActivationScreen> {
     'JAYE-5R9T-2V6C',
   };
 
-  Future<void> _verifyAndUnlock() async {
-    final enteredCode = _codeController.text.trim().toUpperCase();
-
-    if (enteredCode.length < 14) {
+  void _verifyAndUnlock() {
+    final code = _codeController.text.trim().toUpperCase();
+    if (_validCodes.contains(code)) {
       setState(() {
-        _isError = true;
-        _statusMessage = 'Please enter a complete 12-character JAYE code.';
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _statusMessage = '';
-    });
-
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    if (_validCodes.contains(enteredCode)) {
-      setState(() {
-        _isLoading = false;
         _isError = false;
-        _statusMessage = 'Unlocked! Loading 4-Deck Studio...';
+        _statusMessage = 'Unlocked! Welcome to DJ JAY E CHRONIX Studio.';
       });
     } else {
       setState(() {
-        _isLoading = false;
         _isError = true;
-        _statusMessage = 'Invalid or already used code. Request one via WhatsApp.';
+        _statusMessage = 'Invalid code. Tap WhatsApp below to get yours.';
       });
     }
   }
 
-  Future<void> _requestCodeOnWhatsApp() async {
-    const phone = '254790191263';
-    final message = Uri.encodeComponent(
-      'Hello DJ Jay E Chronix, I would like to request an activation code for the DJ App.',
+  Future<void> _openWhatsApp() async {
+    final url = Uri.parse(
+      'https://wa.me.',
     );
-    final whatsappUrl = Uri.parse('https://wa.me');
-
-    if (await canLaunchUrl(whatsappUrl)) {
-      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
-    } else {
-      setState(() {
-        _isError = true;
-        _statusMessage = 'Could not open WhatsApp. Message +254 790 191 263 directly.';
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _codeController.dispose();
-    super.dispose();
+    await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
   @override
   Widget build(BuildContext context) {
-    const goldColor = Color(0xFFD4AF37);
-
+    const gold = Color(0xFFD4AF37);
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
+            padding: const EdgeInsets.all(28),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -113,20 +74,20 @@ class _ActivationScreenState extends State<ActivationScreen> {
                   'DJ JAY E\nCHRONIX',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: goldColor,
+                    color: gold,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 24),
                 Container(
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: goldColor, width: 2),
+                    border: Border.all(color: gold, width: 2),
                   ),
-                  child: const Icon(Icons.lock_outline, color: goldColor, size: 42),
+                  child: const Icon(Icons.lock_outline, color: gold, size: 42),
                 ),
                 const SizedBox(height: 24),
                 const Text(
@@ -137,4 +98,29 @@ class _ActivationScreenState extends State<ActivationScreen> {
                 TextField(
                   controller: _codeController,
                   textAlign: TextAlign.center,
-                  textCapitalization: TextCapitali
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: InputDecoration(
+                    hintText: 'JAYE-XXXX-XXXX',
+                    filled: true,
+                    fillColor: const Color(0xFF1A1A1E),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _verifyAndUnlock,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: gold,
+                      foregroundColor: Colors.black,
+                    ),
+                    child: const Text(
+                      'UNLOCK',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
