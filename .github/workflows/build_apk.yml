@@ -1,33 +1,19 @@
-name: Build DJ JAY E CHRONIX APK
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
+name: Build APK
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Create Clean App & Compile APK
-        run: |
-          flutter create /tmp/dj_app --platforms=android --project-name dj_jay_e_chronix --org com.djjayechronix
-          cp lib/main.dart /tmp/dj_app/lib/main.dart
-          cd /tmp/dj_app
-          flutter pub add url_launcher
-          flutter analyze
-          flutter build apk --debug
-          mkdir -p $GITHUB_WORKSPACE/output
-          cp build/app/outputs/flutter-apk/app-debug.apk $GITHUB_WORKSPACE/output/app-debug.apk
+      - run: |
+          flutter create /tmp/app --platforms=android
+          cp lib/main.dart /tmp/app/lib/main.dart
+          cd /tmp/app && flutter pub add url_launcher && flutter build apk --debug
+          cp build/app/outputs/flutter-apk/app-debug.apk $GITHUB_WORKSPACE/app-debug.apk
       - uses: actions/upload-artifact@v4
         with:
           name: dj-chronix-apk
-          path: output/app-debug.apk
+          path: app-debug.apk
